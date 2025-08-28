@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Musik Recommender</title>
+
+  <!-- DM Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --green: #1DB954;
+      --bg-light: #f5f7fa;
+      --bg-dark: #121212;
+      --text-light: #1c1c1c;
+      --text-dark: #eaeaea;
+      --card-light: #ffffff;
+      --card-dark: #1e1e1e;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      margin: 0;
+      padding: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: var(--card-light);
+      padding: 40px 30px;
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.05);
+      transition: background 0.3s;
+    }
+
+    body.dark .container {
+      background: var(--card-dark);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.8em;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: var(--green);
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .theme-toggle input {
+      display: none;
+    }
+
+    .theme-toggle label {
+      cursor: pointer;
+      background: var(--green);
+      border-radius: 50px;
+      padding: 6px 12px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      user-select: none;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      background: #e8f5e9;
+      border-radius: 50px;
+      padding: 10px 20px;
+      margin-bottom: 40px;
+      border: 2px solid transparent;
+      transition: border 0.3s ease;
+    }
+
+    body.dark .search-container {
+      background: #1a2c1d;
+    }
+
+    .search-container:focus-within {
+      border: 2px solid var(--green);
+      box-shadow: 0 0 0 4px rgba(29, 185, 84, 0.1);
+    }
+
+    .search__icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--green);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 10px;
+    }
+
+    .search__icon::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      background-color: white;
+      border-radius: 50%;
+    }
+
+    .input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-size: 18px;
+      color: inherit;
+      outline: none;
+    }
+
+    .recommendations h2 {
+      font-size: 1.6em;
+      margin-bottom: 20px;
+      font-weight: 600;
+      color: var(--green);
+    }
+
+    .song {
+      display: flex;
+      align-items: center;
+      background: #f0fdf4;
+      border-radius: 12px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.04);
+      border-left: 6px solid var(--green);
+    }
+
+    body.dark .song {
+      background: #1b2b1b;
+    }
+
+    .song:hover {
+      transform: translateY(-3px);
+    }
+
+    .song img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-right: 20px;
+    }
+
+    .song-details {
+      flex: 1;
+    }
+
+    .song-details p {
+      margin: 0;
+      font-size: 1.1em;
+      font-weight: 500;
+    }
+
+    .song-details span {
+      display: block;
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    body.dark .song-details span {
+      color: #ccc;
+    }
+
+    .song a button {
+      background-color: var(--green);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .song a button:hover {
+      background-color: #17a846;
+      transform: scale(1.05);
+    }
+
+    .no-results {
+      text-align: center;
+      font-size: 1.1em;
+      color: #888;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .song {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .song img {
+        margin-bottom: 10px;
+      }
+
+      .song-details {
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Dark Mode Toggle -->
+  <div class="theme-toggle">
+    <input type="checkbox" id="darkToggle" />
+    <label for="darkToggle">🌙 Dark Mode</label>
+  </div>
+
+  <div class="container">
+    <h1>Musik Song Recommender</h1>
+    <form method="POST" action="/">
+      <div class="search-container">
+        <div class="search__icon"></div>
+        <input
+          type="text"
+          name="search_query"
+          class="input"
+          placeholder="Type a song, artist, or vibe..."
+          value="{{ query or '' }}"
+        />
+      </div>
+    </form>
+
+    {% if recommendations is not none %}
+      {% if recommendations %}
+        <div class="recommendations">
+          <h2>Recommended Songs:</h2>
+          {% for song in recommendations %}
+            <div class="song">
+              {% if song.album_cover %}
+                <img src="{{ song.album_cover }}" alt="Album Cover" />
+              {% endif %}
+              <div class="song-details">
+                <p>{{ song.name }}</p>
+                <span>by {{ song.artists|join(', ') }} ({{ song.year }})</span>
+              </div>
+              {% if song.track_url %}
+                <a href="{{ song.track_url }}" target="_blank">
+                  <button>Play on Spotify</button>
+                </a>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="no-results">No recommendations found for "{{ query }}". Try another song!</p>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  <!-- JavaScript to toggle dark mode -->
+  <script>
+    const toggle = document.getElementById('darkToggle');
+    const body = document.body;
+
+    toggle.addEventListener('change', () => {
+      body.classList.toggle('dark');
+    });
+  </script>
+</body>
+</html>
